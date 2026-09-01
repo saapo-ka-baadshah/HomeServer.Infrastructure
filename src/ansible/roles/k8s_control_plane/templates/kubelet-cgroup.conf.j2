@@ -1,5 +1,0 @@
-# cgroupfs driver (REQ-004). Must match containerd SystemdCgroup=false.
-# CLI flag overrides kubeadm-generated /var/lib/kubelet/config.yaml (systemd).
-# Placed before kubelet first starts so the driver is correct from boot.
-[Service]
-Environment="KUBELET_EXTRA_ARGS=--cgroup-driver={{ kubelet_cgroup_driver }}"

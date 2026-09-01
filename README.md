@@ -139,6 +139,8 @@ tmuxinator stop
 | `bridge`         | `string`         | `"vmbr0"`            | Network bridge                           |
 | `ip_address`     | `string`         | `null`               | Static IP (e.g. `10.0.10.51/24`) or `null` for DHCP |
 | `gateway`        | `string`         | `null`               | Network gateway for static IP            |
+| `second_bridge`  | `string`         | `null`               | Optional secondary bridge (e.g. `vmbr0` for internet) |
+| `second_ip_address` | `string`      | `"dhcp"`             | IP for the secondary NIC; `dhcp` or `192.168.178.x/24` |
 | `username`       | `string`         | `"ubuntu"`           | Default user created via cloud-init      |
 | `ssh_keys`       | `list(string)`   | `[]`                 | SSH public keys to inject               |
 | `tags`           | `list(string)`   | `["terraform"]`      | VM tags                                 |

@@ -14,9 +14,13 @@ default_node = "pve"
 # kube_bridge_name defaults to "vmbr1"; set here to override.
 # kube_mgmt_subnet defaults to "10.200.0.0/24"; must not overlap with
 # host (192.168.178.0/24), pod (10.168.178.0/24), or service (10.96.0.0/12) CIDRs.
-# kube_mgmt_gateway defaults to null (isolated bridge with no route to home LAN).
-# second_bridge / second_ip_address: optional secondary NIC for internet access.
-# Each VM gets a second NIC on vmbr0 (home LAN) via DHCP for apt/image pulls.
+# The Proxmox host owns the first usable IP of the subnet (10.200.0.1) on the
+# bridge and acts as the INTERNAL gateway for the K8s nodes: set per-VM `gateway`
+# to that host IP so all cluster communication stays on 10.200.0.0/24.
+# `gateway` = null only if the bridge is truly isolated (no default route).
+# second_bridge / second_ip_address: optional secondary NIC (home LAN) used only
+# for internet egress; nodes NAT through the host, the router is NOT the gateway.
+# Each VM gets a second NIC on vmbr0 (home LAN) for apt/image pulls.
 
 kube_vms = {
   kube-ctrl = {
@@ -30,7 +34,7 @@ kube_vms = {
     disk_size      = 32
     bridge             = "vmbr1"       # dedicated K8s bridge
     ip_address         = "10.200.0.200/24"
-    gateway            = null          # isolated — no gateway
+    gateway            = "10.200.0.1"   # internal gateway on the Proxmox host (vmbr1)
     second_bridge      = "vmbr0"       # secondary NIC for internet via home LAN
     second_ip_address  = "dhcp"
     username           = "ubuntu"
@@ -49,7 +53,7 @@ kube_vms = {
     disk_size          = 32
     bridge             = "vmbr1"
     ip_address         = "10.200.0.201/24"
-    gateway            = null
+    gateway            = "10.200.0.1"
     second_bridge      = "vmbr0"
     second_ip_address  = "dhcp"
     username           = "ubuntu"

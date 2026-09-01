@@ -4,12 +4,12 @@
 # ============================================================================
 # NOTE: kubeadm GENERATES /var/lib/kubelet/config.yaml with `cgroupDriver:
 # systemd`, which does NOT reflect the effective kubelet driver. The effective
-# driver is set via the systemd drop-in (--cgroup-driver=cgroupfs), which
+# driver is set via /etc/default/kubelet (KUBELET_EXTRA_ARGS), which
 # overrides config.yaml. Parsing config.yaml therefore always yields "systemd"
 # and caused this gate to falsely hard-fail a healthy cluster -- blocking
 # Cilium install and leaving nodes NotReady. We now verify the two files the
-# roles actually control (containerd config + kubelet drop-in) and WARN on any
-# mismatch instead of aborting.
+# roles actually control (containerd config + kubelet extra args) and WARN on
+# any mismatch instead of aborting.
 - name: Check containerd and kubelet cgroup driver consistency (cgroupfs)
   shell: |
     set -o pipefail
@@ -20,12 +20,13 @@
     fi
     [ -z "$CONTAINERD_DRIVER" ] && CONTAINERD_DRIVER="(not found)"
 
-    # --- kubelet: authoritative value is the systemd drop-in (CLI flag overrides
-    #     the kubeadm generated config.yaml), which is what sets the EFFECTIVE driver. ---
-    KUBELET_DROPIN=/etc/systemd/system/kubelet.service.d/10-cgroup.conf
+    # --- kubelet: authoritative value is /etc/default/kubelet (KUBELET_EXTRA_ARGS
+    #     CLI flag overrides the kubeadm generated config.yaml), which is what sets
+    #     the EFFECTIVE driver. ---
+    KUBELET_EXTRA_ARGS_FILE=/etc/default/kubelet
     KUBELET_DRIVER="(not found)"
-    if [ -f "$KUBELET_DROPIN" ]; then
-      KUBELET_DRIVER=$(grep -Eo -- '--cgroup-driver=[^"[:space:]]+' "$KUBELET_DROPIN" 2>/dev/null | head -1 | cut -d= -f2-)
+    if [ -f "$KUBELET_EXTRA_ARGS_FILE" ]; then
+      KUBELET_DRIVER=$(grep -Eo -- '--cgroup-driver=[^"[:space:]]+' "$KUBELET_EXTRA_ARGS_FILE" 2>/dev/null | head -1 | cut -d= -f2-)
     fi
     [ -z "$KUBELET_DRIVER" ] && KUBELET_DRIVER="(not found)"
 

@@ -1,0 +1,12 @@
+# Kubelet extra args (REQ-004). Sourced by kubelet.service.d/10-kubeadm.conf as
+# its intended user override (last writer wins; a drop-in Environment= setting is
+# cleared by this file when it sets KUBELET_EXTRA_ARGS).
+#
+# cgroupfs driver must match containerd SystemdCgroup=false; the CLI flag
+# overrides the kubeadm-generated /var/lib/kubelet/config.yaml (systemd).
+#
+# --node-ip pins the node's InternalIP to the dedicated management subnet
+# (ansible_host on vmbr1). Without it kubelet auto-selects the default-route
+# interface (the home-LAN NIC) or an IPv6 ULA, leaving the node unreachable
+# from the control plane and breaking CNI/apiserver connectivity.
+KUBELET_EXTRA_ARGS="--cgroup-driver={{ kubelet_cgroup_driver }} --node-ip={{ ansible_host }}"

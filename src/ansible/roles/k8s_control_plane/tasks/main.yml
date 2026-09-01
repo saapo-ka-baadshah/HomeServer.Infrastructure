@@ -75,17 +75,17 @@
     - kubeadm
     - kubectl
 
-- name: Create kubelet systemd drop-in directory
-  file:
-    path: /etc/systemd/system/kubelet.service.d
-    state: directory
-    mode: '0755'
-
-- name: Configure kubelet cgroup driver via systemd drop-in
+- name: Configure kubelet extra args via /etc/default/kubelet
   template:
-    src: kubelet-cgroup.conf.j2
-    dest: /etc/systemd/system/kubelet.service.d/10-cgroup.conf
+    src: kubelet-extra-args.j2
+    dest: /etc/default/kubelet
     mode: '0644'
+  notify: Restart kubelet
+
+- name: Remove obsolete kubelet service drop-in (config now in /etc/default/kubelet)
+  file:
+    path: /etc/systemd/system/kubelet.service.d/10-cgroup.conf
+    state: absent
   notify: Restart kubelet
 
 - name: Flush handlers so containerd and kubelet restart before kubeadm init

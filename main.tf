@@ -10,7 +10,10 @@ resource "proxmox_download_file" "kube_module_img" {
 resource "proxmox_network_linux_bridge" "kube_bridge" {
   node_name = var.default_node
   name      = var.kube_bridge_name
-  address   = var.kube_mgmt_subnet
+  # Host-side address on the bridge: first usable IP of the management subnet.
+  # This makes the Proxmox host the internal gateway for the K8s nodes so all
+  # cluster communication stays on 10.200.0.0/24 (no home-router hop).
+  address   = "${cidrhost(var.kube_mgmt_subnet, 1)}/${element(split("/", var.kube_mgmt_subnet), 1)}"
   comment   = "Dedicated Kubernetes management bridge"
   autostart = true
 }
