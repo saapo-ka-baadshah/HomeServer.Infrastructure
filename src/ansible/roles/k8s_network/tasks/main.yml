@@ -44,6 +44,16 @@
   failed_when: false
 
 # ============================================================================
+# Installing all basline network CRDs necessary for Cilium
+# ============================================================================
+- name: k8s_network | Install CRDs - GatewayAPIController, GatewayClasses, Gateway
+  shell: |
+    kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/standard-install.yaml
+  changed_when: false
+  failed_when: false
+  
+
+# ============================================================================
 # Helm installation (REQ-009) — official binary to /usr/local/bin
 # ============================================================================
 - name: Check if Helm is already installed
@@ -103,6 +113,7 @@
     --set image.pullPolicy={{ cilium_image_pull_policy }}
     --set ipam.mode={{ cilium_ipam_mode }}
     --set etcd.enabled={{ cilium_etcd_enabled | string | lower }}
+    --set gatewayAPI.enabled={{ cilium_gateway_api_enabled | string | lower }}
   when: cilium_release_name not in cilium_release_list.stdout_lines
 
 # ============================================================================
