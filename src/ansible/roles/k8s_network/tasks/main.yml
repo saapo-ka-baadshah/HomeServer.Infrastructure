@@ -52,6 +52,14 @@
   changed_when: false
   failed_when: false
   
+# ============================================================================
+# Installation: Load balancer CRD and load balancer controller
+# ============================================================================
+- name: k8s_network | Install CRDs and Controller - MetalLB
+  shell: |
+    kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.x/config/manifests/metallb-native.yaml
+  changed_when: false
+  failed_when: false
 
 # ============================================================================
 # Helm installation (REQ-009) — official binary to /usr/local/bin
